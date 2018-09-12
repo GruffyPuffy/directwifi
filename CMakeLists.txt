@@ -10,6 +10,6 @@ add_executable(tx tx.cpp)
 target_link_libraries(tx pcap ${CMAKE_THREAD_LIBS_INIT})
 
 
-### The Test (my small tests) executable
-#add_executable(mytest test.cpp)
-#target_link_libraries(mytest ${CMAKE_THREAD_LIBS_INIT})
+### The RX executable
+add_executable(rx rx.cpp)
+target_link_libraries(rx pcap ${CMAKE_THREAD_LIBS_INIT})
