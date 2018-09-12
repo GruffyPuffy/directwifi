@@ -222,7 +222,7 @@ class WifiDirect
         return WifiDirect::Transmit(data.data(), data.size(), port);
     }
 
-    int Receive(std::vector<uint8_t> &data)
+    std::vector<uint8_t> Receive()
     {
         int retval;
         uint8_t *bufferPtr = 0;
@@ -239,14 +239,14 @@ class WifiDirect
 
         // Get the radiotap header length
         uint16_t radioTapLength = ((uint8_t)bufferPtr[2] + ((uint8_t)bufferPtr[3] << 8));
-        std::cout << "RadioTapLength = " << radioTapLength << std::endl;
+        //std::cout << "RadioTapLength = " << radioTapLength << std::endl;
 
         // Skip to "payload"
         uint16_t startOfPayload = radioTapLength + ieee80211DataHeaderLength;
         bufferPtr += startOfPayload; 
         uint16_t payloadLength = headerPtr->len - startOfPayload - 14;
 
-        std::cout << "PACKAGE length: " << headerPtr->len << std::endl;
+        //std::cout << "PACKAGE length: " << headerPtr->len << std::endl;
         bufferPtrBegin = bufferPtr;
         /*
         for (int i = 0; i < payloadLength; i++)
@@ -258,7 +258,9 @@ class WifiDirect
         }
         std::cout << std::endl;
         */
+        std::vector<uint8_t> data;
         std::copy(bufferPtrBegin, bufferPtrBegin + payloadLength, std::back_inserter(data));
+        return data;
     }
 
     int GetFileDescriptor()

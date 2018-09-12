@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
 
     // Wait for things to settle...
     std::this_thread::sleep_for(std::chrono::seconds(1));
-    std::cout << "Device opened." << std::endl;
+    //std::cout << "Device opened." << std::endl;
 
     while (true)
     {
@@ -48,13 +48,19 @@ int main(int argc, char *argv[])
 
         if (FD_ISSET(rec.GetFileDescriptor(), &readset))
         {
-            rec.Receive(data);
+            data = rec.Receive();
+
+            /*
             for (int i = 0; i < data.size(); i++)
             {
                 // Easier with printf...
                 printf("%.2X ", data[i]);
             }
             std::cout << std::endl;
+            */
+
+            std::string out(data.begin(), data.end());
+            std::cout << out;
         }
     }
 
