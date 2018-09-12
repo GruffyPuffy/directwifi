@@ -8,6 +8,11 @@
 
 #pragma once
 
+//
+// Code adapted from Victor Robertson - https://gist.github.com/vmrob
+// Changed to read "blocks in binary form"
+//
+
 class AsyncStreamReader
 {
   public:

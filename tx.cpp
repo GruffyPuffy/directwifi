@@ -192,38 +192,21 @@ int main(int argc, char *argv[])
 
 	while (true)
 	{
-
-		// Ask the AsyncStreamReader reader if it has input ready for us. This is a
-		// thread-safe function. In fact, all of AsyncStreamReader is thread safe.
 		while (reader.isReady())
 		{
 			std::vector<char> data = reader.getLine();
-			//std::string data = reader.getLine();
-			//std::cout << "Data in: " << data << std::endl;
 			inj.Transmit(data);
 		}
 
-		// Check if the reader is running. If it's running, we'll need to continue
-		// to check for input until it no longer runs. It will "run" until it has
-		// no more input for us and can't get anymore.
 		if (reader.stillRunning())
 		{
 			std::cout << "...still waiting..." << std::endl;
 		}
 		else
 		{
-			// eof = end of file. If you were to pipe input into the program via
-			// unix pipes (cat filename | ./nonblocking), std::cin would receive
-			// input via the pipe. When the pipe no longer has any input, it sends
-			// the eof character. AsynStreamReader will "run" until all of the
-			// input is consumed and it hits eof. If you run it without pipes,
-			// (such as via the normal console), you'll never reach eof in
-			// std::cin unless you send it directly via control-D.
 			std::cout << "...eof..." << std::endl;
 		}
 
-		// Tell the thread to sleep for a little bit.
-		//std::this_thread::sleep_for(std::chrono::seconds(1));
 		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	}
 
