@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
             */
 
                 std::string out(data.begin(), data.end());
-                std::cout << out;
+                std::cout << out << std::flush;
             }
             //std::cout << "...tick..." << std::endl;
             //std::this_thread::sleep_for(std::chrono::milliseconds(100));

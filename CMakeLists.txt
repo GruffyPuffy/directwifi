@@ -9,6 +9,9 @@ find_package (Threads)
 add_executable(tx tx.cpp)
 target_link_libraries(tx pcap ${CMAKE_THREAD_LIBS_INIT})
 
+### The TXTEST executable (requires libpcap-dev installed)
+add_executable(txtest txtest.cpp)
+target_link_libraries(txtest pcap ${CMAKE_THREAD_LIBS_INIT})
 
 ### The RX executable
 add_executable(rx rx.cpp)

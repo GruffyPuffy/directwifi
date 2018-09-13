@@ -52,7 +52,7 @@ class WifiDirect
         // 1600 = snaplen specifies the snapshot length to be set on the handle.
         // 0 = promisc specifies if the interface is to be put into promiscuous mode.
         // 20 = to_ms specifies the read timeout in milliseconds.
-        pcapDev = pcap_open_live(device.c_str(), 1600, 0, 20, szErrbuf);
+        pcapDev = pcap_open_live(device.c_str(), BUFSIZ, 0, 0, szErrbuf);
         if (pcapDev == 0)
         {
             throw WifiDirectException("Could not open pcad device!");
