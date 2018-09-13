@@ -31,26 +31,28 @@ int main(int argc, char *argv[])
     std::this_thread::sleep_for(std::chrono::seconds(1));
     //std::cout << "Device opened." << std::endl;
 
-    while (true)
+    try
     {
-        std::vector<uint8_t> data;
-
-        fd_set readset;
-        struct timeval to;
-
-        to.tv_sec = 0;
-        to.tv_usec = 1e5;
-
-        FD_ZERO(&readset);
-        FD_SET(rec.GetFileDescriptor(), &readset);
-
-        int n = select(30, &readset, NULL, NULL, &to);
-
-        if (FD_ISSET(rec.GetFileDescriptor(), &readset))
+        while (true)
         {
-            data = rec.Receive();
+            std::vector<uint8_t> data;
 
-            /*
+            fd_set readset;
+            struct timeval to;
+
+            to.tv_sec = 0;
+            to.tv_usec = 1e5;
+
+            FD_ZERO(&readset);
+            FD_SET(rec.GetFileDescriptor(), &readset);
+
+            int n = select(30, &readset, NULL, NULL, &to);
+
+            if (FD_ISSET(rec.GetFileDescriptor(), &readset))
+            {
+                data = rec.Receive();
+
+                /*
             for (int i = 0; i < data.size(); i++)
             {
                 // Easier with printf...
@@ -59,13 +61,17 @@ int main(int argc, char *argv[])
             std::cout << std::endl;
             */
 
-            std::string out(data.begin(), data.end());
-            std::cout << out;
+                std::string out(data.begin(), data.end());
+                std::cout << out;
+            }
+            //std::cout << "...tick..." << std::endl;
+            //std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
     }
-
-    std::cout << "...tick..." << std::endl;
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    catch (WifiDirectException &caught)
+    {
+        std::cout << "PROBLEM: " << caught.what() << std::endl;
+    }
 
     return (0);
 }

@@ -19,6 +19,14 @@
 
 #pragma once
 
+struct WifiDirectException : public std::exception
+{
+    std::string s;
+    WifiDirectException(std::string ss) : s(ss) {}
+    ~WifiDirectException() throw() {}
+    const char *what() const throw() { return s.c_str(); }
+};
+
 class WifiDirect
 {
   private:
@@ -47,13 +55,13 @@ class WifiDirect
         pcapDev = pcap_open_live(device.c_str(), 1600, 0, 20, szErrbuf);
         if (pcapDev == 0)
         {
-            throw "Could not open pcad device!";
+            throw WifiDirectException("Could not open pcad device!");
         }
 
         // Check if wifi
         if (pcap_datalink(pcapDev) != DLT_IEEE802_11_RADIO)
         {
-            throw "Not Wifi???? Failed...";
+            throw WifiDirectException("Not Wifi???? Failed...");
         }
 
         // Default
@@ -73,7 +81,7 @@ class WifiDirect
             // Blocking device
             if (pcap_setnonblock(pcapDev, 1, szErrbuf) < 0)
             {
-                throw "Could not set blocking mode.";
+                throw WifiDirectException("Could not set blocking mode.");
             }
         }
         else
@@ -81,7 +89,7 @@ class WifiDirect
             // No blocking device
             if (pcap_setnonblock(pcapDev, 0, szErrbuf) < 0)
             {
-                throw "Could not set non-blocking mode.";
+                throw WifiDirectException("Could not set non-blocking mode.");
             }
         }
     }
@@ -96,7 +104,7 @@ class WifiDirect
         {
             puts(program);
             puts(pcap_geterr(pcapDev));
-            throw "Failed to compile pcap program...";
+            throw WifiDirectException("Failed to compile pcap program...");
         }
         else
         {
@@ -104,7 +112,7 @@ class WifiDirect
             {
                 fprintf(stderr, "%s\n", program);
                 fprintf(stderr, "%s\n", pcap_geterr(pcapDev));
-                throw "Failed to set pcap filter...";
+                throw WifiDirectException("Failed to set pcap filter...");
             }
             pcap_freecode(&bpfProgram);
         }
@@ -175,7 +183,7 @@ class WifiDirect
         pPacket += sizeof(ieeeHeader);
 
         headerLength = pPacket - packet;
-        std::cout << "HEADER length: " << headerLength << std::endl;
+        //std::cout << "HEADER length: " << headerLength << std::endl;
 
         //
         // DATA
@@ -183,25 +191,39 @@ class WifiDirect
         memcpy(pPacket, data, dataLength);
         pPacket += dataLength;
         packageLength = pPacket - packet;
-        std::cout << "PACKAGE length: " << packageLength << std::endl;
-
+        //std::cout << "PACKAGE length: " << packageLength << std::endl;
+        /*
         for (int i = 0; i < packageLength; i++)
         {
             // Easier with printf...
             printf("%.2X ", packet[i]);
         }
         std::cout << std::endl;
+        */
 
         //
         // INJECT
         //
-        int numSent = pcap_inject(pcapDev, packet, packageLength);
-        if (numSent != packageLength)
+        int numRetries = 10;
+        std::string err;
+        while (numRetries > 0)
         {
-            throw "Failed to inject!";
-        }
+            int numSent = pcap_inject(pcapDev, packet, packageLength);
+            if (numSent != packageLength)
+            {
+                err = std::string("Failed to inject - ") + std::string(pcap_geterr(pcapDev));
+                //throw WifiDirectException(err);
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            }
+            else
+            {
+                return packageLength;
+            }
 
-        return packageLength;
+            numRetries--;
+        }
+        std::cout << err << std::endl;
+        return -1;
     }
 
     int Transmit(std::string data, uint8_t port)
@@ -233,7 +255,7 @@ class WifiDirect
         if (retval != 1)
         {
             puts(pcap_geterr(pcapDev));
-            throw "Wifi device failed...";
+            throw WifiDirectException("Wifi device failed...");
         }
 
         // Get the radiotap header length
@@ -242,7 +264,7 @@ class WifiDirect
 
         // Skip to "payload"
         uint16_t startOfPayload = radioTapLength + ieee80211DataHeaderLength;
-        bufferPtr += startOfPayload; 
+        bufferPtr += startOfPayload;
         uint16_t payloadLength = headerPtr->len - startOfPayload - 14;
 
         //std::cout << "PACKAGE length: " << headerPtr->len << std::endl;

@@ -11,8 +11,6 @@
 #include "AsyncStreamReader.h"
 #include "WifiDirect.h"
 
-
-
 int main(int argc, char *argv[])
 {
 
@@ -36,24 +34,29 @@ int main(int argc, char *argv[])
 
 	AsyncStreamReader reader{&std::cin, 256};
 
-	while (true)
+	try
 	{
-		while (reader.isReady())
+		while (true)
 		{
-			std::vector<char> data = reader.getLine();
-			inj.Transmit(data, 0x77);
-		}
+			while (reader.isReady())
+			{
+				std::vector<char> data = reader.getLine();
+				inj.Transmit(data, 0x77);
+				//std::cout << "...tx-ing..." << std::endl;
+			}
 
-		if (reader.stillRunning())
-		{
-			std::cout << "...still waiting..." << std::endl;
-		}
-		else
-		{
-			std::cout << "...eof..." << std::endl;
-		}
+			if (!reader.stillRunning())
+			{
+				std::cout << "...eof..." << std::endl;
+				throw WifiDirectException("EndOfFile detected...");
+			}
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+			//std::this_thread::sleep_for(std::chrono::milliseconds(100));
+		}
+	}
+	catch (WifiDirectException &caught)
+	{
+		std::cout << "PROBLEM: " << caught.what() << std::endl;
 	}
 
 	return (0);
