@@ -198,7 +198,6 @@ class WifiDirect
         int numSent = pcap_inject(pcapDev, packet, packageLength);
         if (numSent != packageLength)
         {
-            pcap_perror(pcapDev, "Failed to inject!");
             throw "Failed to inject!";
         }
 
